@@ -405,28 +405,6 @@ async def on_ready():
     except Exception as e:
         print(e)
 
-# COMANDO SLASH E POR PREFIXO PARA ENVIAR O PAINEL
-@bot.tree.command(name="setup_set", description="Envia a mensagem inicial do sistema de set.")
-@app_commands.checks.has_permissions(administrator=True)
-async def setup_set(interaction: discord.Interaction):
-    embed_painel = criar_embed_amarelo(
-        titulo="⚖️ Central de Atendimento Jurídico",
-        descricao=
-        "Seja bem-vindo(a) ao sistema de atendimento da Jardim Peri.\n"
-        "Através do atendimento, você pode falar diretamente com nossa equipe.\n\n"
-        "• Certifique-se de preencher seus dados de RP corretamente.\n\n"
-         "**Horário de Atendimento:** 08:00 - 00:00"
-    )
-
-    embed_painel.set_image(url="https://cdn.discordapp.com/attachments/1444735189765849320/1526692086819328070/Criadores_JP_2.png?ex=6a5943ce&is=6a57f24e&hm=484f998b6d3387c061b1d67dd92235928c3d166c1798788fa9d0e4f2b6d2de18&")
-
-    embed_painel.set_footer(text="TJSP Jardim Peri RP - Todos os direitos reservados © 2026", icon_url="https://cdn.discordapp.com/attachments/1444735189765849320/1526686691786752091/brasao_tjsp.webp?ex=6a593ec7&is=6a57ed47&hm=675a0a3d73ee60941aa54937e4ca85e84daa38622e0a70abf002cf659115cd59&")  
-
-    await interaction.channel.send(embed=embed_painel, view=ViewInicio())
-    
-    embed_confirma = criar_embed_amarelo("✅ Sucesso", "Painel enviado no canal com sucesso!")
-    await interaction.response.send_message(embed=embed_confirma, ephemeral=True)
-
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def TJSP1(ctx):
