@@ -134,11 +134,11 @@ class ModalDados(discord.ui.Modal):
 
         embed_log.add_field(name="<:pessoas:1526764699490713662> Aberto por", value=f"**{interaction.user.mention} (`{interaction.user.id}`)**", inline=False)            
         embed_log.add_field(name="<:pessoas:1526764699490713662> Nome", value=f"`{self.nome.value}`", inline=False)
-        embed_log.add_field(name="<:111:1526738453511934023> ID", value=f"`{self.identificador.value}`", inline=False)
+        embed_log.add_field(name="<:111:1526738453511934023> ID", value=f"`{self.identificador.value}`", inline=True)
         embed_log.add_field(name="<:paineladmin:1526748297564389558> Instituição", value=f"`{self.instituicao}`", inline=False)
-        embed_log.add_field(name="<:111:1526738453511934023> Cargo", value=f"`{self.cargo}`", inline=False)
+        embed_log.add_field(name="<:111:1526738453511934023> Cargo", value=f"`{self.cargo}`", inline=True)
         embed_log.add_field(name="<:baixar:1526771301065162874> Status", value="`PENDENTE`", inline=False)
-        embed_log.add_field(name="<:222:1526738486126972929> Código da Solicitação", value=f"`{codigo}`", inline=False)
+        embed_log.add_field(name="<:222:1526738486126972929> Código da Solicitação", value=f"`{codigo}`", inline=True)
 
         view = ViewAprovacao(codigo)
 
