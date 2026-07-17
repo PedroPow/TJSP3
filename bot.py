@@ -12,7 +12,7 @@ import os
 # CONFIGURAÇÕES DO BOT E CARGOS
 # ==============================================================================
 TOKEN = os.getenv("TOKEN_TJSP")  # Substitua pelo token do seu bot
-CANAL_LOGS_ID = 1526670983350718464  # Substitua pelo ID do canal de aprovação/logs
+CANAL_LOGS_ID = 1527467826967744612  # Substitua pelo ID do canal de aprovação/logs
 
 # Mapeamento dos cargos do Discord (Insira os IDs numéricos dos seus cargos)
 ROLES = {
@@ -41,14 +41,14 @@ ROLES = {
     "[✧✧✧] Capitão QOPM": 1527188235409817640,
     
     # Policia Civil
-    "Delegado Geral (PC)": 1526386653894279258,
-    "Delegado (PC)": 1526386653894279258,
-    "Delegado Adjunto (PC)": 1526386653894279258,
+    "Delegado Geral (PC)": 1527188958260367410,
+    "Delegado (PC)": 1527189129190703156,
+    "Delegado Adjunto (PC)": 1527189193107705896,
     
     # Policia Federal
-    "Delegado Geral (PF)": 1526386752070353056,
-    "Delegado (PF)": 1526386752070353056,
-    "Delegado Adjunto (PF)": 1526386752070353056,
+    "Delegado Geral (PF)": 1527189518355271884,
+    "Delegado (PF)": 1527189576844574812,
+    "Delegado Adjunto (PF)": 1527189628006699049,
 }
 
 # Exemplo: ID do cargo que deve ser marcado nas logs (ex: Staff / Aprovadores)
