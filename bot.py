@@ -14,45 +14,47 @@ import os
 TOKEN = os.getenv("TOKEN_TJSP")  # Substitua pelo token do seu bot
 CANAL_LOGS_ID = 1527467826967744612  # Substitua pelo ID do canal de aprovação/logs
 
-# Mapeamento dos cargos do Discord (Insira os IDs numéricos dos seus cargos)
+# Mapeamento dos cargos do Discord.
+# AGORA CADA CHAVE MAPEIA PARA UMA LISTA DE IDS DE CARGOS!
+# Assim você pode adicionar 1, 2 ou mais cargos para cada opção selecionada.
 ROLES = {
     # Prefeitura e Cidadão
-    "CIDADÃO": 1526643628548817056,
-    "PREFEITURA": 1526383985129947206,  # Cargo com acesso exclusivo para gerenciar Prefeitura
+    "CIDADÃO": [1526643628548817056],
+    "PREFEITURA": [1526383985129947206],  # Cargo com acesso exclusivo para gerenciar Prefeitura
     
     # TJSP
-    "Presidente": 1526388081077518456,
-    "Vice Presidente": 1526388116774977626,
-    "Administrador": 1526379218865229895,
-    "Desembargador Geral": 1526384213278982174,
-    "Juiz": 1526386991644807228,
-    "Advogado": 1526386841694109847,
-    "Promotor": 1526386906777260196,
-    "Oficial de Justiça": 1526387360986566726,
-    "Estagiário de Advocacia": 1526387373766606929,
-    "Segurança": 1526387511755276369,
+    "Presidente": [1526388081077518456],
+    "Vice Presidente": [1526388116774977626],
+    "Administrador": [1526379218865229895],
+    "Desembargador Geral": [1526384213278982174],
+    "Juiz": [1526386991644807228],
+    "Advogado": [1526386841694109847],
+    "Promotor": [1526386906777260196],
+    "Oficial de Justiça": [1526387360986566726],
+    "Estagiário de Advocacia": [1526387373766606929],
+    "Segurança": [1526387511755276369],
     
-    # Policia Militar
-    "[☫ ∗⁑] Comandante Geral da Policia Militar": 1527186659873919027,
-    "[∥⁂∥] Sub Comandante Geral da Policia Militar": 1527186549349810216,
-    "[✵✵✵] Coronel QOPM": 1527188175200456854,
-    "[✵✵✧] Tenente Coronel QOPM": 1527188197233397900,
-    "[✵✧✧] Major QOPM": 1527188216262955092,
-    "[✧✧✧] Capitão QOPM": 1527188235409817640,
+    # Policia Militar (Exemplo de atribuição de múltiplos cargos: ID do Cargo + ID da Tag Geral da PM se quiser)
+    "[☫ ∗⁑] Comandante Geral da Policia Militar": [1527186659873919027, 1527164625744040048], 
+    "[∥⁂∥] Sub Comandante Geral da Policia Militar": [1527186549349810216, 1527164625744040048],
+    "[✵✵✵] Coronel QOPM": [1527188175200456854, 1527164625744040048],
+    "[✵✵✧] Tenente Coronel QOPM": [1527188197233397900, 1527164625744040048],
+    "[✵✧✧] Major QOPM": [1527188216262955092, 1527164625744040048],
+    "[✧✧✧] Capitão QOPM": [1527188235409817640, 1527164625744040048],
     
     # Policia Civil
-    "Delegado Geral (PC)": 1527188958260367410,
-    "Delegado (PC)": 1527189129190703156,
-    "Delegado Adjunto (PC)": 1527189193107705896,
+    "Delegado Geral (PC)": [1527188958260367410, 1526386653894279258],
+    "Delegado (PC)": [1527189129190703156, 1526386653894279258],
+    "Delegado Adjunto (PC)": [1527189193107705896, 1526386653894279258],
     
     # Policia Federal
-    "Delegado Geral (PF)": 1527189518355271884,
-    "Delegado (PF)": 1527189576844574812,
-    "Delegado Adjunto (PF)": 1527189628006699049,
+    "Delegado Geral (PF)": [1527189518355271884, 1526386752070353056],
+    "Delegado (PF)": [1527189576844574812, 1526386752070353056],
+    "Delegado Adjunto (PF)": [1527189628006699049, 1526386752070353056],
 }
 
-# Exemplo: ID do cargo que deve ser marcado nas logs (ex: Staff / Aprovadores)
-CARGO_RESPONSAVEL_ID = 1526624858912461002  # Substitua pelo ID real do cargo
+# ID do cargo que deve ser marcado nas logs (ex: Staff / Aprovadores)
+CARGO_RESPONSAVEL_ID = 1526624858912461002
 
 # ==============================================================================
 # FUNÇÃO AUXILIAR PARA EMBEDS PADRÃO AMARELO
@@ -113,47 +115,47 @@ class ModalDados(discord.ui.Modal):
         self.add_item(self.identificador)
 
     async def on_submit(self, interaction: discord.Interaction):
-            codigo = gerar_codigo()
-            
-            cursor.execute('''
-                INSERT INTO solicitacoes (codigo, user_id, nome, identificador, instituicao, cargo, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (codigo, interaction.user.id, self.nome.value, self.identificador.value, self.instituicao, self.cargo, 'PENDENTE'))
-            conn.commit()
+        codigo = gerar_codigo()
+        
+        cursor.execute('''
+            INSERT INTO solicitacoes (codigo, user_id, nome, identificador, instituicao, cargo, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (codigo, interaction.user.id, self.nome.value, self.identificador.value, self.instituicao, self.cargo, 'PENDENTE'))
+        conn.commit()
 
-            canal_logs = interaction.guild.get_channel(CANAL_LOGS_ID)
-            if not canal_logs:
-                embed_erro = criar_embed_amarelo("❌ Erro no Sistema", "Canal de logs não foi encontrado. Contate a administração.")
-                await interaction.response.send_message(embed=embed_erro, ephemeral=True)
-                return
+        canal_logs = interaction.guild.get_channel(CANAL_LOGS_ID)
+        if not canal_logs:
+            embed_erro = criar_embed_amarelo("❌ Erro no Sistema", "Canal de logs não foi encontrado. Contate a administração.")
+            await interaction.response.send_message(embed=embed_erro, ephemeral=True)
+            return
 
-            # Embed enviado para o Canal de Logs
-            embed_log = criar_embed_amarelo(f"<:assumirticket:1526748343978561547> Solicitação **{codigo}**", f"Uma nova solicitação foi recebida")
+        # Embed enviado para o Canal de Logs
+        embed_log = criar_embed_amarelo(f"<:assumirticket:1526748343978561547> Solicitação **{codigo}**", f"Uma nova solicitação foi recebida")
 
-            embed_log.add_field(name="<:pessoas:1526764699490713662> Aberto por", value=f"**{interaction.user.mention} (`{interaction.user.id}`)**", inline=False)            
-            embed_log.add_field(name="<:pessoas:1526764699490713662> Nome", value=f"`{self.nome.value}`", inline=False)
-            embed_log.add_field(name="<:111:1526738453511934023> ID", value=f"`{self.identificador.value}`", inline=False)
-            embed_log.add_field(name="<:paineladmin:1526748297564389558> Instituição", value=f"`{self.instituicao}`", inline=False)
-            embed_log.add_field(name="<:111:1526738453511934023> Cargo", value=f"`{self.cargo}`", inline=False)
-            embed_log.add_field(name="<:baixar:1526771301065162874> Status", value="`PENDENTE`", inline=False)
-            embed_log.add_field(name="<:222:1526738486126972929> Código da Solicitação", value=f"`{codigo}`", inline=False)
+        embed_log.add_field(name="<:pessoas:1526764699490713662> Aberto por", value=f"**{interaction.user.mention} (`{interaction.user.id}`)**", inline=False)            
+        embed_log.add_field(name="<:pessoas:1526764699490713662> Nome", value=f"`{self.nome.value}`", inline=False)
+        embed_log.add_field(name="<:111:1526738453511934023> ID", value=f"`{self.identificador.value}`", inline=False)
+        embed_log.add_field(name="<:paineladmin:1526748297564389558> Instituição", value=f"`{self.instituicao}`", inline=False)
+        embed_log.add_field(name="<:111:1526738453511934023> Cargo", value=f"`{self.cargo}`", inline=False)
+        embed_log.add_field(name="<:baixar:1526771301065162874> Status", value="`PENDENTE`", inline=False)
+        embed_log.add_field(name="<:222:1526738486126972929> Código da Solicitação", value=f"`{codigo}`", inline=False)
 
-            view = ViewAprovacao(codigo)
+        view = ViewAprovacao(codigo)
 
-            # UNICO ENVIO (Menciona os cargos e envia o embed numa única mensagem)
-            await canal_logs.send(
-                content=f"<@&1526383985129947206> <@&{CARGO_RESPONSAVEL_ID}>",
-                embed=embed_log, 
-                view=view
-            )        
+        # UNICO ENVIO (Menciona os cargos e envia o embed numa única mensagem)
+        await canal_logs.send(
+            content=f"<@&1526383985129947206> <@&{CARGO_RESPONSAVEL_ID}>",
+            embed=embed_log, 
+            view=view
+        )        
 
-            # Resposta privada ao usuário
-            embed_sucesso = criar_embed_amarelo(
-                "✅ Solicitação Enviada!", 
-                f"Sua solicitação foi enviada com sucesso para análise.\n\n**Código da Solicitação:** `{codigo}`"
-            )
+        # Resposta privada ao usuário
+        embed_sucesso = criar_embed_amarelo(
+            "✅ Solicitação Enviada!", 
+            f"Sua solicitação foi enviada com sucesso para análise.\n\n**Código da Solicitação:** `{codigo}`"
+        )
 
-            await interaction.response.send_message(embed=embed_sucesso, ephemeral=True)
+        await interaction.response.send_message(embed=embed_sucesso, ephemeral=True)
 
 # ==============================================================================
 # SELECT MENU DE CARGOS
@@ -179,11 +181,11 @@ class ViewCargo(discord.ui.View):
 class SelectInstituicao(discord.ui.Select):
     def __init__(self):
         options = [
-            discord.SelectOption(label="TJSP", emoji="<:TJSP:1527173718445654188> ", value="TJSP"),
+            discord.SelectOption(label="TJSP", emoji="<:TJSP:1527173718445654188>", value="TJSP"),
             discord.SelectOption(label="PREFEITURA", emoji="<:PREFEITURA:1527173343495585833>", value="PREFEITURA"),
-            discord.SelectOption(label="POLICIA MILITAR", emoji="<:PMESP:1527172485349380137> ", value="POLICIA MILITAR"),
-            discord.SelectOption(label="POLICIA CIVIL", emoji="<:PCESP:1527173768802340984> ", value="POLICIA CIVIL"),
-            discord.SelectOption(label="POLICIA FEDERAL", emoji="<:POLICIAFEDERAL:1527173809264787526> ", value="POLICIA FEDERAL"),
+            discord.SelectOption(label="POLICIA MILITAR", emoji="<:PMESP:1527172485349380137>", value="POLICIA MILITAR"),
+            discord.SelectOption(label="POLICIA CIVIL", emoji="<:PCESP:1527173768802340984>", value="POLICIA CIVIL"),
+            discord.SelectOption(label="POLICIA FEDERAL", emoji="<:POLICIAFEDERAL:1527173809264787526>", value="POLICIA FEDERAL"),
             discord.SelectOption(label="CIDADÃO", emoji="<:JARDIM_PERI:1527173159692931162>", value="CIDADÃO"),
         ]
         super().__init__(placeholder="Selecione sua Instituição...", options=options)
@@ -221,7 +223,7 @@ class ViewInicio(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
-    @discord.ui.button(label="Solicitar Set",  style=discord.ButtonStyle.secondary, emoji="<:assumirticket:1526748343978561547>", custom_id="btn_solicitar_set")
+    @discord.ui.button(label="Solicitar Set", style=discord.ButtonStyle.secondary, emoji="<:assumirticket:1526748343978561547>", custom_id="btn_solicitar_set")
     async def solicitar_set(self, interaction: discord.Interaction, button: discord.ui.Button):
         embed_inst = criar_embed_amarelo(
             "⚖️ Seleção de Instituição", 
@@ -230,7 +232,7 @@ class ViewInicio(discord.ui.View):
         await interaction.response.send_message(embed=embed_inst, view=ViewInstituicao(), ephemeral=True)
 
 # ==============================================================================
-# BOTOES DE APROVAÇÃO / REPROVAÇÃO (SISTEMA DE LOGS COM RESTRIÇÃO)
+# BOTÕES DE APROVAÇÃO / REPROVAÇÃO (SISTEMA DE LOGS COM RESTRIÇÃO)
 # ==============================================================================
 class ViewAprovacao(discord.ui.View):
     def __init__(self, codigo: str = None):
@@ -242,8 +244,8 @@ class ViewAprovacao(discord.ui.View):
     async def _validar_permissao_prefeitura(self, interaction: discord.Interaction, instituicao: str) -> bool:
         """Verifica permissão exclusiva para aprovações/reprovações da Prefeitura"""
         if instituicao == "PREFEITURA":
-            id_cargo_prefeitura = ROLES.get("PREFEITURA")
-            tem_cargo = any(role.id == id_cargo_prefeitura for role in interaction.user.roles)
+            ids_prefeitura = ROLES.get("PREFEITURA", [])
+            tem_cargo = any(role.id in ids_prefeitura for role in interaction.user.roles)
             if not tem_cargo:
                 embed_negado = criar_embed_amarelo(
                     "🚫 Acesso Negado!", 
@@ -253,7 +255,7 @@ class ViewAprovacao(discord.ui.View):
                 return False
         return True
 
-    @discord.ui.button(label="Aceitar", style=discord.ButtonStyle.secondary, emoji="<:AMARELO:1527182949466767371> ")
+    @discord.ui.button(label="Aceitar", style=discord.ButtonStyle.secondary, emoji="<:AMARELO:1527182949466767371>")
     async def aceitar(self, interaction: discord.Interaction, button: discord.ui.Button):
         codigo = button.custom_id.split("_")[1]
         
@@ -284,33 +286,27 @@ class ViewAprovacao(discord.ui.View):
         # ALTERAÇÃO DO APELIDO (NICKNAME) NO SERVIDOR PARA O PADRÃO (Nome | ID)
         novo_nick = f"{nome_rp} | {id_game}"
         try:
-            # Garante que o nickname não passe do limite do Discord (32 caracteres)
             if len(novo_nick) > 32:
                 novo_nick = novo_nick[:32]
             await membro.edit(nick=novo_nick)
         except discord.Forbidden:
-            print(f"⚠️ Sem permissão para alterar o apelido de {membro.display_name} (O cargo do bot precisa estar acima do membro ou o membro é o Dono do Servidor).")
+            print(f"⚠️ Sem permissão para alterar o apelido de {membro.display_name}.")
         except Exception as e:
             print(f"⚠️ Erro ao tentar alterar o apelido: {e}")
 
-        # REGRA ESPECIAL DE CARGOS DUPLOS DA PM
-        if cargo_nome == "COMANDO GERAL":
-            cargos_para_adicionar = ["COMANDO GERAL", "CORONEL PM"]
-        elif cargo_nome == "SUB COMANDO GERAL":
-            cargos_para_adicionar = ["SUB COMANDO GERAL", "TENENTE CORONEL PM"]
-        else:
-            cargos_para_adicionar = [cargo_nome]
-
+        # LÓGICA DE ATRIBUIÇÃO DE TODOS OS CARGOS VINCULADOS
+        roles_ids = ROLES.get(cargo_nome, [])
         roles_add = []
-        for c in cargos_para_adicionar:
-            role_id = ROLES.get(c)
-            if role_id:
-                role = interaction.guild.get_role(role_id)
-                if role:
-                    roles_add.append(role)
+        for r_id in roles_ids:
+            role = interaction.guild.get_role(r_id)
+            if role:
+                roles_add.append(role)
 
         if roles_add:
-            await membro.add_roles(*roles_add)
+            try:
+                await membro.add_roles(*roles_add)
+            except Exception as e:
+                print(f"Erro ao adicionar cargos: {e}")
 
         cursor.execute("UPDATE solicitacoes SET status = 'ACEITO', processado_por = ? WHERE codigo = ?", (interaction.user.id, codigo))
         conn.commit()
@@ -323,7 +319,7 @@ class ViewAprovacao(discord.ui.View):
             if field.name == "<:baixar:1526771301065162874> Status":
                 embed.set_field_at(i, name="<:baixar:1526771301065162874> Status", value="`ACEITO`", inline=False)
         
-        embed.add_field(name="<:ticketassumido:1526748366015565904>  Aceito por", value=f"{interaction.user.mention} (`{interaction.user.id}`)", inline=False)
+        embed.add_field(name="<:ticketassumido:1526748366015565904> Aceito por", value=f"{interaction.user.mention} (`{interaction.user.id}`)", inline=False)
 
         for child in self.children:
             child.disabled = True
@@ -366,7 +362,7 @@ class ViewAprovacao(discord.ui.View):
             if field.name == "<:baixar:1526771301065162874> Status":
                 embed.set_field_at(i, name="<:baixar:1526771301065162874> Status", value="`RECUSADO`", inline=False)
 
-        embed.add_field(name="<:111:1526738453511934023>  Recusado por", value=f"{interaction.user.mention} (`{interaction.user.id}`)", inline=False)
+        embed.add_field(name="<:111:1526738453511934023> Recusado por", value=f"{interaction.user.mention} (`{interaction.user.id}`)", inline=False)
 
         for child in self.children:
             child.disabled = True
@@ -405,9 +401,10 @@ async def on_ready():
     except Exception as e:
         print(e)
 
-@bot.command()
+# COMANDO EXCLUSIVO PARA ADMINISTRADORES/STAFF ENVIAR O PAINEL
+@bot.command(name="setup")
 @commands.has_permissions(administrator=True)
-async def TJSP1(ctx):
+async def setup(ctx):
     embed_painel = criar_embed_amarelo(
         titulo="⚖️ Central de Atendimento Jurídico",
         descricao=
@@ -418,9 +415,15 @@ async def TJSP1(ctx):
     )
 
     embed_painel.set_image(url="https://cdn.discordapp.com/attachments/1444735189765849320/1526692086819328070/Criadores_JP_2.png?ex=6a5943ce&is=6a57f24e&hm=484f998b6d3387c061b1d67dd92235928c3d166c1798788fa9d0e4f2b6d2de18&")
-
     embed_painel.set_footer(text="TJSP Jardim Peri RP - Todos os direitos reservados © 2026", icon_url="https://cdn.discordapp.com/attachments/1444735189765849320/1526686691786752091/brasao_tjsp.webp?ex=6a593ec7&is=6a57ed47&hm=675a0a3d73ee60941aa54937e4ca85e84daa38622e0a70abf002cf659115cd59&")
 
     await ctx.send(embed=embed_painel, view=ViewInicio())
+
+# Trata o erro caso um membro sem permissão tente usar o !setup
+@setup.error
+async def setup_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        embed = criar_embed_amarelo("🚫 Acesso Negado", "Apenas membros da **Administração / Staff** podem utilizar este comando.")
+        await ctx.send(embed=embed, delete_after=5)
 
 bot.run(TOKEN)
