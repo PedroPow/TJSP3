@@ -321,7 +321,7 @@ class ViewAprovacao(discord.ui.View):
             return
 
         membro = interaction.guild.get_member(user_id)
-        if not miembro:
+        if not membro:
             embed_erro = criar_embed_amarelo(f"<:Erro:1528229921204207626> Erro", "O membro solicitante não foi encontrado no servidor.")
             await interaction.response.send_message(embed=embed_erro, ephemeral=True)
             return
