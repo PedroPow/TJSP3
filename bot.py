@@ -35,12 +35,12 @@ ROLES = {
     "Segurança": [1526387511755276369],
     
     # Policia Militar (Exemplo de atribuição de múltiplos cargos: ID do Cargo + ID da Tag Geral da PM se quiser)
-    "[☫ ∗⁑] Comandante Geral da Policia Militar": [1527186659873919027, 1527164625744040048], 
-    "[∥⁂∥] Sub Comandante Geral da Policia Militar": [1527186549349810216, 1527164625744040048],
-    "[✵✵✵] Coronel QOPM": [1527188175200456854, 1527164625744040048],
-    "[✵✵✧] Tenente Coronel QOPM": [1527188197233397900, 1527164625744040048],
-    "[✵✧✧] Major QOPM": [1527188216262955092, 1527164625744040048],
-    "[✧✧✧] Capitão QOPM": [1527188235409817640, 1527164625744040048],
+    "Comandante Geral da Policia Militar": [1527186659873919027, 1527164625744040048], 
+    "Sub Comandante Geral da Policia Militar": [1527186549349810216, 1527164625744040048],
+    "Coronel QOPM": [1527188175200456854, 1527164625744040048],
+    "Tenente Coronel QOPM": [1527188197233397900, 1527164625744040048],
+    "Major QOPM": [1527188216262955092, 1527164625744040048],
+    "Capitão QOPM": [1527188235409817640, 1527164625744040048],
     
     # Policia Civil
     "Delegado Geral (PC)": [1527188958260367410, 1526386653894279258],
@@ -199,7 +199,7 @@ class SelectInstituicao(discord.ui.Select):
 
         cargos_map = {
             "TJSP": ["Presidente", "Vice Presidente", "Administrador", "Desembargador Geral", "Juiz", "Advogado", "Promotor", "Oficial de Justiça", "Estágiario de Advogado", "Segurança"],
-            "POLICIA MILITAR": ["[☫ ∗⁑] Comandante Geral da Policia Militar", "[∥⁂∥] Sub Comandante Geral da Policia Militar", "[✵✵✵] Coronel QOPM", "[✵✵✧] Tenente Coronel QOPM", "[✵✧✧] Major QOPM", "[✧✧✧] Capitão QOPM"],
+            "POLICIA MILITAR": [f"<:CMTG:1528263064493887659> Comandante Geral da Policia Militar", f"<:SUBCMTG:1528265603062960139> Sub Comandante Geral da Policia Militar", f"<:CEL:1528263109888835625> Coronel QOPM", f"<:TENCEL:1528263185684234320> Tenente Coronel QOPM", f"<:MAJOR:1528263226100285480> Major QOPM", f"<:CAP:1528263261127180449> Capitão QOPM"],
             "POLICIA CIVIL": ["Delegado Geral (PC)", "Delegado (PC)", "Delegado Adjunto (PC)"],
             "POLICIA FEDERAL": ["Delegado Geral (PF)", "Delegado (PF)", "Delegado Adjunto (PF)"]
         }
