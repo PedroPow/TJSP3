@@ -151,7 +151,7 @@ class ModalDados(discord.ui.Modal):
 
         # Resposta privada ao usuário
         embed_sucesso = criar_embed_amarelo(
-            "✅ Solicitação Enviada!", 
+            f"<:ticketassumido:1526748366015565904> Solicitação Enviada!", 
             f"Sua solicitação foi enviada com sucesso para análise.\n\n**Código da Solicitação:** `{codigo}`"
         )
 
@@ -342,14 +342,14 @@ class ViewAprovacao(discord.ui.View):
             if field.name == "<:baixar:1526771301065162874> Status":
                 embed.set_field_at(i, name="<:baixar:1526771301065162874> Status", value="`ACEITO`", inline=False)
         
-        embed.add_field(name="<:ticketassumido:1526748366015565904> Aceito por", value=f"{interaction.user.mention} (`{interaction.user.id}`)", inline=False)
+        embed.add_field(name=f"<:ticketassumido:1526748366015565904> Aceito por", value=f"{interaction.user.mention} (`{interaction.user.id}`)", inline=False)
 
         for child in self.children:
             child.disabled = True
 
         await interaction.response.edit_message(embed=embed, view=self)
 
-        embed_notif = criar_embed_amarelo("✅ Credencial Aprovada", f"A credencial de {membro.mention} foi aprovada com sucesso, o cargo Visitante foi removido e seu nome alterado para `{novo_nick}`!")
+        embed_notif = criar_embed_amarelo(f"<:ticketassumido:1526748366015565904> Credencial Aprovada", f"A credencial de {membro.mention} foi aprovada com sucesso, o cargo Visitante foi removido e seu nome alterado para `{novo_nick}`!")
         await interaction.followup.send(embed=embed_notif, ephemeral=True)
 
     @discord.ui.button(label="Reprovar", style=discord.ButtonStyle.secondary, emoji="<:x1:1527182368958316695>")
@@ -419,7 +419,7 @@ bot = SetBot()
 
 @bot.event
 async def on_ready():
-    print(f"✅ Bot online como {bot.user.name}")
+    print(f"<:ticketassumido:1526748366015565904> Bot online como {bot.user.name}")
     try:
         synced = await bot.tree.sync()
         print(f"🔗 {len(synced)} comandos Slash sincronizados.")
