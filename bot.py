@@ -225,6 +225,22 @@ class ViewInicio(discord.ui.View):
 
     @discord.ui.button(label="Solicitar Set", style=discord.ButtonStyle.secondary, emoji="<:assumirticket:1526748343978561547>", custom_id="btn_solicitar_set")
     async def solicitar_set(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # Verifica se o membro já tem um set PENDENTE ou ACEITO no banco de dados
+        cursor.execute("SELECT status FROM solicitacoes WHERE user_id = ? AND (status = 'PENDENTE' OR status = 'ACEITO')", (interaction.user.id,))
+        resultado = cursor.fetchone()
+
+        if resultado:
+            status_atual = resultado[0]
+            if status_atual == "PENDENTE":
+                msg = "🚫 Você já possui uma solicitação em **análise**. Aguarde a aprovação ou recusa antes de tentar novamente."
+            else:
+                msg = "🚫 Você já possui um set **aprovado** neste servidor. Não é possível solicitar outro."
+                
+            embed_bloqueio = criar_embed_amarelo("Acesso Bloqueado", msg)
+            await interaction.response.send_message(embed=embed_bloqueio, ephemeral=True)
+            return
+
+        # Se não tiver nenhum pendente/aceito, segue para a seleção normalmente
         embed_inst = criar_embed_amarelo(
             "⚖️ Seleção de Instituição", 
             "Selecione a sua instituição no menu abaixo para continuar:"
@@ -283,18 +299,16 @@ class ViewAprovacao(discord.ui.View):
             await interaction.response.send_message(embed=embed_erro, ephemeral=True)
             return
 
-        # ALTERAÇÃO DO APELIDO (NICKNAME) NO SERVIDOR PARA O PADRÃO (Nome | ID)
+        # ALTERAÇÃO DO APELIDO (NICKNAME) NO SERVIDOR
         novo_nick = f"{nome_rp} | {id_game}"
         try:
             if len(novo_nick) > 32:
                 novo_nick = novo_nick[:32]
             await membro.edit(nick=novo_nick)
-        except discord.Forbidden:
-            print(f"⚠️ Sem permissão para alterar o apelido de {membro.display_name}.")
         except Exception as e:
             print(f"⚠️ Erro ao tentar alterar o apelido: {e}")
 
-        # LÓGICA DE ATRIBUIÇÃO DE TODOS OS CARGOS VINCULADOS
+        # LÓGICA DE ATRIBUIÇÃO DOS NOVOS CARGOS
         roles_ids = ROLES.get(cargo_nome, [])
         roles_add = []
         for r_id in roles_ids:
@@ -308,6 +322,15 @@ class ViewAprovacao(discord.ui.View):
             except Exception as e:
                 print(f"Erro ao adicionar cargos: {e}")
 
+        # REGRA NOVA: REMOVER O CARGO VISITANTE ("1526629697247776839")
+        cargo_visitante = interaction.guild.get_role(1526629697247776839)
+        if cargo_visitante and cargo_visitante in membro.roles:
+            try:
+                await membro.remove_roles(cargo_visitante)
+            except Exception as e:
+                print(f"⚠️ Erro ao tentar remover o cargo Visitante: {e}")
+
+        # Seta o status definitivo como ACEITO (Mantém o botão Solicitar Set bloqueado para sempre)
         cursor.execute("UPDATE solicitacoes SET status = 'ACEITO', processado_por = ? WHERE codigo = ?", (interaction.user.id, codigo))
         conn.commit()
 
@@ -326,7 +349,7 @@ class ViewAprovacao(discord.ui.View):
 
         await interaction.response.edit_message(embed=embed, view=self)
 
-        embed_notif = criar_embed_amarelo("✅ Set Aprovado", f"O set de {membro.mention} foi aprovado com sucesso e seu nome foi alterado para `{novo_nick}`!")
+        embed_notif = criar_embed_amarelo("✅ Set Aprovado", f"O set de {membro.mention} foi aprovado com sucesso, o cargo Visitante foi removido e seu nome alterado para `{novo_nick}`!")
         await interaction.followup.send(embed=embed_notif, ephemeral=True)
 
     @discord.ui.button(label="Reprovar", style=discord.ButtonStyle.secondary, emoji="<:x1:1527182368958316695>")
@@ -351,6 +374,8 @@ class ViewAprovacao(discord.ui.View):
             await interaction.response.send_message(embed=embed_aviso, ephemeral=True)
             return
 
+        # Atualiza para RECUSADO no banco. Na próxima vez que o usuário clicar em "Solicitar Set",
+        # a query do banco não vai achar nenhum 'PENDENTE' ou 'ACEITO', permitindo que ele envie de novo.
         cursor.execute("UPDATE solicitacoes SET status = 'RECUSADO', processado_por = ? WHERE codigo = ?", (interaction.user.id, codigo))
         conn.commit()
 
@@ -369,7 +394,7 @@ class ViewAprovacao(discord.ui.View):
 
         await interaction.response.edit_message(embed=embed, view=self)
 
-        embed_notif = criar_embed_amarelo("❌ Set Recusado", "A solicitação foi recusada com sucesso.")
+        embed_notif = criar_embed_amarelo("❌ Set Recusado", "A solicitação foi recusada com sucesso. O usuário foi desbloqueado para reenviar se desejar.")
         await interaction.followup.send(embed=embed_notif, ephemeral=True)
 
 # ==============================================================================
