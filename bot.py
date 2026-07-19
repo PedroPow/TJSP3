@@ -41,6 +41,14 @@ ROLES = {
     "Tenente Coronel QOPM": [1527188197233397900, 1527164625744040048],
     "Major QOPM": [1527188216262955092, 1527164625744040048],
     "Capitão QOPM": [1527188235409817640, 1527164625744040048],
+
+    # Guarda Civil Metropolitana
+    "Comandante Geral da Guarda Civil Metropolitana": [1528272649627897906, 1528112035668164709],
+    "Sub Comandante Geral da Guarda Civil Metropolitana": [1528272775007961242, 1528112035668164709],
+    "Inspetor Superintendente": [1528272834017628160, 1528112035668164709],
+    "Inspetor de Grupamento": [1528272888992497664, 1528112035668164709],
+    "Inspetor de Divisão": [1528272915596837016, 1528112035668164709],
+    "Inspetor": [1528272945204432937, 1528112035668164709],
     
     # Policia Civil
     "Delegado Geral (PC)": [1527188958260367410, 1526386653894279258],
@@ -160,10 +168,46 @@ class ModalDados(discord.ui.Modal):
 # ==============================================================================
 # SELECT MENU DE CARGOS
 # ==============================================================================
+# ==============================================================================
+# DICIONÁRIO DE SUPORTE PARA OS EMOJIS DAS PATENTES
+# ==============================================================================
+# Aqui associamos o nome exato da sua chave ROLES ao emoji correspondente.
+# O Discord vai exibir esse emoji GRUDADO na patente dentro do Select Menu.
+EMOJIS_CARGOS = {
+    "Comandante Geral da Policia Militar": "<:CMTG:1528263064493887659>",
+    "Sub Comandante Geral da Policia Militar": "<:SUBCMTG:1528265603062960139>",
+    "Coronel QOPM": "<:CEL:1528263109888835625>",
+    "Tenente Coronel QOPM": "<:TENCEL:1528263185684234320>",
+    "Major QOPM": "<:MAJOR:1528263226100285480>",
+    "Capitão QOPM": "<:CAP:1528263261127180449>"
+
+    "Comandante Geral da Guarda Civil Metropolitana": "<:CMTGGCM:1528273679497171075>",
+    "Sub Comandante Geral da Guarda Civil Metropolitana": "<:SCMTGGCM:1528273713936601288>",
+    "Inspetor Superintendente": "<:INSPSUPERINTENDENTE:1528273773697175603>",
+    "Inspetor de Grupamento": "<:INSPGRUPAMENTO:1528273805787795506>",
+    "Inspetor de Divisão": "<:INSDIVISO:1528273837555449866>",
+    "Inspetor": "<:INSPETOR:1528273864239349770>"
+}
+
+# ==============================================================================
+# SELECT MENU DE CARGOS CORRIGIDO
+# ==============================================================================
 class SelectCargo(discord.ui.Select):
     def __init__(self, instituicao: str, opcoes: list):
         self.instituicao = instituicao
-        options = [discord.SelectOption(label=cargo, value=cargo) for cargo in opcoes]
+        
+        options = []
+        for cargo in opcoes:
+            # Pegamos o emoji correspondente à patente se ele existir no dicionário acima
+            emoji_da_patente = EMOJIS_CARGOS.get(cargo, None)
+            
+            # Criamos a opção do menu injetando o emoji nativamente
+            options.append(discord.SelectOption(
+                label=cargo,         # O nome da patente que aparece escrito
+                value=cargo,         # O valor em texto puro que vai pro banco e pro ROLES
+                emoji=emoji_da_patente # O emoji personalizado que aparece do lado do nome!
+            ))
+            
         super().__init__(placeholder="Selecione o seu Cargo...", options=options)
 
     async def callback(self, interaction: discord.Interaction):
@@ -186,6 +230,7 @@ class SelectInstituicao(discord.ui.Select):
             discord.SelectOption(label="POLICIA MILITAR", emoji="<:PMESP:1527172485349380137>", value="POLICIA MILITAR"),
             discord.SelectOption(label="POLICIA CIVIL", emoji="<:PCESP:1527173768802340984>", value="POLICIA CIVIL"),
             discord.SelectOption(label="POLICIA FEDERAL", emoji="<:POLICIAFEDERAL:1527173809264787526>", value="POLICIA FEDERAL"),
+            discord.SelectOption(label="GUARDA CIVIL METROPOLITANA", emoji="<:CGM:1528272227747762298>", value="GUARDA CIVIL METROPOLITANA"),
             discord.SelectOption(label="CIDADÃO", emoji="<:JARDIM_PERI:1527173159692931162>", value="CIDADÃO"),
         ]
         super().__init__(placeholder="Selecione sua Instituição...", options=options)
@@ -198,8 +243,9 @@ class SelectInstituicao(discord.ui.Select):
             return
 
         cargos_map = {
-            "TJSP": ["Presidente", "Vice Presidente", "Administrador", "Desembargador Geral", "Juiz", "Advogado", "Promotor", "Oficial de Justiça", "Estágiario de Advogado", "Segurança"],
-            "POLICIA MILITAR": [f"<:CMTG:1528263064493887659> Comandante Geral da Policia Militar", f"<:SUBCMTG:1528265603062960139> Sub Comandante Geral da Policia Militar", f"<:CEL:1528263109888835625> Coronel QOPM", f"<:TENCEL:1528263185684234320> Tenente Coronel QOPM", f"<:MAJOR:1528263226100285480> Major QOPM", f"<:CAP:1528263261127180449> Capitão QOPM"],
+            "TJSP": ["Presidente", "Vice Presidente", "Administrador", "Desembargador Geral", "Juiz", "Advogado", "Promotor", "Oficial de Justiça", "Estagiário de Advocacia", "Segurança"],
+            "POLICIA MILITAR": ["Comandante Geral da Policia Militar", "Sub Comandante Geral da Policia Militar", "Coronel QOPM", "Tenente Coronel QOPM", "Major QOPM", "Capitão QOPM"],
+            "GUARDA CIVIL Metropolitana": ["Comandante Geral da Guarda Civil Metropolitana", "Sub Comandante Geral da Guarda Civil Metropolitana", "Inspetor Superintendente", "Inspetor de Grupamento", "Inspetor de Divisão", "Inspetor"],
             "POLICIA CIVIL": ["Delegado Geral (PC)", "Delegado (PC)", "Delegado Adjunto (PC)"],
             "POLICIA FEDERAL": ["Delegado Geral (PF)", "Delegado (PF)", "Delegado Adjunto (PF)"]
         }
