@@ -144,11 +144,11 @@ class ModalDados(discord.ui.Modal):
 
         view = ViewAprovacao(codigo)
 
-        # await canal_logs.send(
-        #    content=f"<@&1526383985129947206> <@&{CARGO_RESPONSAVEL_ID}>",
-        #    embed=embed_log, 
-        #    view=view
-        #)        
+        await canal_logs.send(
+           content=f"<@&1526383985129947206> <@&{CARGO_RESPONSAVEL_ID}>",
+           embed=embed_log, 
+           view=view
+        )      
 
         embed_sucesso = criar_embed_amarelo(
             f"<:ticketassumido:1526748366015565904> Solicitação Enviada!", 
