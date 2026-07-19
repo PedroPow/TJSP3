@@ -60,6 +60,7 @@ ROLES = {
 }
 
 CARGO_RESPONSAVEL_ID = 1526624858912461002
+DB_NAME = "solicitacoes.db"
 
 # ==============================================================================
 # FUNÇÃO AUXILIAR PARA EMBEDS PADRÃO AMARELO
@@ -72,23 +73,26 @@ def criar_embed_amarelo(titulo: str, descricao: str = None) -> discord.Embed:
     )
 
 # ==============================================================================
-# BANCO DE DADOS (SQLite)
+# BANCO DE DADOS (SQLite) - INICIALIZAÇÃO SEGURA
 # ==============================================================================
-conn = sqlite3.connect("solicitacoes.db")
-cursor = conn.cursor()
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS solicitacoes (
-    codigo TEXT PRIMARY KEY,
-    user_id INTEGER,
-    nome TEXT,
-    identificador TEXT,
-    instituicao TEXT,
-    cargo TEXT,
-    status TEXT,
-    processado_por INTEGER
-)
-''')
-conn.commit()
+def init_db():
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS solicitacoes (
+            codigo TEXT PRIMARY KEY,
+            user_id INTEGER,
+            nome TEXT,
+            identificador TEXT,
+            instituicao TEXT,
+            cargo TEXT,
+            status TEXT,
+            processado_por INTEGER
+        )
+        ''')
+        conn.commit()
+
+init_db()
 
 def gerar_codigo():
     return '#' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
@@ -121,11 +125,13 @@ class ModalDados(discord.ui.Modal):
     async def on_submit(self, interaction: discord.Interaction):
         codigo = gerar_codigo()
         
-        cursor.execute('''
-            INSERT INTO solicitacoes (codigo, user_id, nome, identificador, instituicao, cargo, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (codigo, interaction.user.id, self.nome.value, self.identificador.value, self.instituicao, self.cargo, 'PENDENTE'))
-        conn.commit()
+        with sqlite3.connect(DB_NAME) as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO solicitacoes (codigo, user_id, nome, identificador, instituicao, cargo, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (codigo, interaction.user.id, self.nome.value, self.identificador.value, self.instituicao, self.cargo, 'PENDENTE'))
+            conn.commit()
 
         canal_logs = interaction.guild.get_channel(CANAL_LOGS_ID)
         if not canal_logs:
@@ -176,7 +182,7 @@ EMOJIS_CARGOS = {
 }
 
 # ==============================================================================
-# SELECT MENU DE CARGOS CORRIGIDO
+# SELECT MENU DE CARGOS
 # ==============================================================================
 class SelectCargo(discord.ui.Select):
     def __init__(self, instituicao: str, opcoes: list):
@@ -255,8 +261,10 @@ class ViewInicio(discord.ui.View):
 
     @discord.ui.button(label="Solicitar Credencial", style=discord.ButtonStyle.secondary, emoji="<:assumirticket:1526748343978561547>", custom_id="btn_solicitar_set")
     async def solicitar_set(self, interaction: discord.Interaction, button: discord.ui.Button):
-        cursor.execute("SELECT status FROM solicitacoes WHERE user_id = ? AND (status = 'PENDENTE' OR status = 'ACEITO')", (interaction.user.id,))
-        resultado = cursor.fetchone()
+        with sqlite3.connect(DB_NAME) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT status FROM solicitacoes WHERE user_id = ? AND (status = 'PENDENTE' OR status = 'ACEITO')", (interaction.user.id,))
+            resultado = cursor.fetchone()
 
         if resultado:
             status_atual = resultado[0]
@@ -302,8 +310,10 @@ class ViewAprovacao(discord.ui.View):
     async def aceitar(self, interaction: discord.Interaction, button: discord.ui.Button):
         codigo = button.custom_id.split("_")[1]
         
-        cursor.execute("SELECT user_id, nome, identificador, cargo, status, instituicao FROM solicitacoes WHERE codigo = ?", (codigo,))
-        dados = cursor.fetchone()
+        with sqlite3.connect(DB_NAME) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT user_id, nome, identificador, cargo, status, instituicao FROM solicitacoes WHERE codigo = ?", (codigo,))
+            dados = cursor.fetchone()
 
         if not dados:
             embed_erro = criar_embed_amarelo(f"<:Erro:1528229921204207626> Erro", "Solicitação não encontrada no banco de dados.")
@@ -354,8 +364,10 @@ class ViewAprovacao(discord.ui.View):
             except Exception as e:
                 print(f"<:Erro:1528229921204207626> Erro ao tentar remover o cargo Visitante: {e}")
 
-        cursor.execute("UPDATE solicitacoes SET status = 'ACEITO', processado_por = ? WHERE codigo = ?", (interaction.user.id, codigo))
-        conn.commit()
+        with sqlite3.connect(DB_NAME) as conn:
+            cursor = conn.cursor()
+            cursor.execute("UPDATE solicitacoes SET status = 'ACEITO', processado_por = ? WHERE codigo = ?", (interaction.user.id, codigo))
+            conn.commit()
 
         embed = interaction.message.embeds[0]
         embed.color = discord.Color.yellow()
@@ -378,8 +390,10 @@ class ViewAprovacao(discord.ui.View):
     async def recusar(self, interaction: discord.Interaction, button: discord.ui.Button):
         codigo = button.custom_id.split("_")[1]
 
-        cursor.execute("SELECT user_id, status, instituicao FROM solicitacoes WHERE codigo = ?", (codigo,))
-        dados = cursor.fetchone()
+        with sqlite3.connect(DB_NAME) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT user_id, status, instituicao FROM solicitacoes WHERE codigo = ?", (codigo,))
+            dados = cursor.fetchone()
 
         if not dados:
             embed_erro = criar_embed_amarelo(f"<:Erro:1528229921204207626> Erro", "Solicitação não encontrada.")
@@ -396,8 +410,10 @@ class ViewAprovacao(discord.ui.View):
             await interaction.response.send_message(embed=embed_aviso, ephemeral=True)
             return
 
-        cursor.execute("UPDATE solicitacoes SET status = 'RECUSADO', processado_por = ? WHERE codigo = ?", (interaction.user.id, codigo))
-        conn.commit()
+        with sqlite3.connect(DB_NAME) as conn:
+            cursor = conn.cursor()
+            cursor.execute("UPDATE solicitacoes SET status = 'RECUSADO', processado_por = ? WHERE codigo = ?", (interaction.user.id, codigo))
+            conn.commit()
 
         embed = interaction.message.embeds[0]
         embed.color = discord.Color.yellow()
@@ -424,13 +440,17 @@ class SetBot(commands.Bot):
         intents = discord.Intents.default()
         intents.members = True
         intents.message_content = True
-        super().__init__(command_prefix="!", intents=intents)
+        # CORREÇÃO DEFINITIVA: case_insensitive=True adicionado globalmente
+        super().__init__(command_prefix="!", intents=intents, case_insensitive=True)
 
     async def setup_hook(self):
         self.add_view(ViewInicio())
         
-        cursor.execute("SELECT codigo FROM solicitacoes WHERE status = 'PENDENTE'")
-        pendentes = cursor.fetchall()
+        with sqlite3.connect(DB_NAME) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT codigo FROM solicitacoes WHERE status = 'PENDENTE'")
+            pendentes = cursor.fetchall()
+            
         for p in pendentes:
             self.add_view(ViewAprovacao(codigo=p[0]))
 
