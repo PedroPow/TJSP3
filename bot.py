@@ -232,11 +232,11 @@ class ViewInicio(discord.ui.View):
         if resultado:
             status_atual = resultado[0]
             if status_atual == "PENDENTE":
-                msg = "🚫 Você já possui uma solicitação em **análise**. Aguarde a aprovação ou recusa antes de tentar novamente."
+                msg = "Você já possui uma solicitação em **análise**. Aguarde a aprovação ou recusa antes de tentar novamente."
             else:
-                msg = "🚫 Você já possui um set **aprovado** neste servidor. Não é possível solicitar outro."
+                msg = "Você já possui um set **aprovado** neste servidor. Não é possível solicitar outro."
                 
-            embed_bloqueio = criar_embed_amarelo("Acesso Bloqueado", msg)
+            embed_bloqueio = criar_embed_amarelo(f"<:111:1526738453511934023> Acesso Bloqueado", msg)
             await interaction.response.send_message(embed=embed_bloqueio, ephemeral=True)
             return
 
