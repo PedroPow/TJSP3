@@ -125,7 +125,7 @@ class ModalDados(discord.ui.Modal):
 
         canal_logs = interaction.guild.get_channel(CANAL_LOGS_ID)
         if not canal_logs:
-            embed_erro = criar_embed_amarelo("❌ Erro no Sistema", "Canal de logs não foi encontrado. Contate a administração.")
+            embed_erro = criar_embed_amarelo(f"<:Erro:1528229921204207626> Erro no Sistema", "Canal de logs não foi encontrado. Contate a administração.")
             await interaction.response.send_message(embed=embed_erro, ephemeral=True)
             return
 
@@ -223,7 +223,7 @@ class ViewInicio(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
-    @discord.ui.button(label="Solicitar Set", style=discord.ButtonStyle.secondary, emoji="<:assumirticket:1526748343978561547>", custom_id="btn_solicitar_set")
+    @discord.ui.button(label="Solicitar Credencial", style=discord.ButtonStyle.secondary, emoji="<:assumirticket:1526748343978561547>", custom_id="btn_solicitar_set")
     async def solicitar_set(self, interaction: discord.Interaction, button: discord.ui.Button):
         # Verifica se o membro já tem um set PENDENTE ou ACEITO no banco de dados
         cursor.execute("SELECT status FROM solicitacoes WHERE user_id = ? AND (status = 'PENDENTE' OR status = 'ACEITO')", (interaction.user.id,))
@@ -236,7 +236,7 @@ class ViewInicio(discord.ui.View):
             else:
                 msg = "Você já possui um set **aprovado** neste servidor. Não é possível solicitar outro."
                 
-            embed_bloqueio = criar_embed_amarelo(f"<:111:1526738453511934023> Acesso Bloqueado", msg)
+            embed_bloqueio = criar_embed_amarelo(f"<:Erro:1528229921204207626> Acesso Bloqueado", msg)
             await interaction.response.send_message(embed=embed_bloqueio, ephemeral=True)
             return
 
@@ -264,7 +264,7 @@ class ViewAprovacao(discord.ui.View):
             tem_cargo = any(role.id in ids_prefeitura for role in interaction.user.roles)
             if not tem_cargo:
                 embed_negado = criar_embed_amarelo(
-                    "🚫 Acesso Negado!", 
+                    f"<:Erro:1528229921204207626> Acesso Negado!", 
                     "Apenas membros com o cargo de **PREFEITURA** podem aprovar ou recusar solicitações desta instituição."
                 )
                 await interaction.response.send_message(embed=embed_negado, ephemeral=True)
@@ -279,7 +279,7 @@ class ViewAprovacao(discord.ui.View):
         dados = cursor.fetchone()
 
         if not dados:
-            embed_erro = criar_embed_amarelo("❌ Erro", "Solicitação não encontrada no banco de dados.")
+            embed_erro = criar_embed_amarelo(f"<:Erro:1528229921204207626> Erro", "Solicitação não encontrada no banco de dados.")
             await interaction.response.send_message(embed=embed_erro, ephemeral=True)
             return
 
@@ -295,7 +295,7 @@ class ViewAprovacao(discord.ui.View):
 
         membro = interaction.guild.get_member(user_id)
         if not membro:
-            embed_erro = criar_embed_amarelo("❌ Erro", "O membro solicitante não foi encontrado no servidor.")
+            embed_erro = criar_embed_amarelo(f"<:Erro:1528229921204207626> Erro", "O membro solicitante não foi encontrado no servidor.")
             await interaction.response.send_message(embed=embed_erro, ephemeral=True)
             return
 
@@ -349,7 +349,7 @@ class ViewAprovacao(discord.ui.View):
 
         await interaction.response.edit_message(embed=embed, view=self)
 
-        embed_notif = criar_embed_amarelo("✅ Set Aprovado", f"O set de {membro.mention} foi aprovado com sucesso, o cargo Visitante foi removido e seu nome alterado para `{novo_nick}`!")
+        embed_notif = criar_embed_amarelo("✅ Credencial Aprovada", f"A credencial de {membro.mention} foi aprovada com sucesso, o cargo Visitante foi removido e seu nome alterado para `{novo_nick}`!")
         await interaction.followup.send(embed=embed_notif, ephemeral=True)
 
     @discord.ui.button(label="Reprovar", style=discord.ButtonStyle.secondary, emoji="<:x1:1527182368958316695>")
@@ -360,7 +360,7 @@ class ViewAprovacao(discord.ui.View):
         dados = cursor.fetchone()
 
         if not dados:
-            embed_erro = criar_embed_amarelo("❌ Erro", "Solicitação não encontrada.")
+            embed_erro = criar_embed_amarelo(f"<:Erro:1528229921204207626> Erro", "Solicitação não encontrada.")
             await interaction.response.send_message(embed=embed_erro, ephemeral=True)
             return
 
@@ -394,7 +394,7 @@ class ViewAprovacao(discord.ui.View):
 
         await interaction.response.edit_message(embed=embed, view=self)
 
-        embed_notif = criar_embed_amarelo("❌ Set Recusado", "A solicitação foi recusada com sucesso. O usuário foi desbloqueado para reenviar se desejar.")
+        embed_notif = criar_embed_amarelo(f"<:Erro:1528229921204207626> Credencial Recusada", "A solicitação foi recusada com sucesso. O usuário foi desbloqueado para reenviar se desejar.")
         await interaction.followup.send(embed=embed_notif, ephemeral=True)
 
 # ==============================================================================
@@ -431,7 +431,7 @@ async def on_ready():
 @commands.has_permissions(administrator=True)
 async def setup(ctx):
     embed_painel = criar_embed_amarelo(
-        titulo="⚖️ Central de Atendimento Jurídico",
+        titulo=f"<:TJSP:1527173718445654188> Central de Atendimento Jurídico",
         descricao=
         "Seja bem-vindo(a) ao sistema de atendimento da Jardim Peri.\n"
         "Através do atendimento, você pode falar diretamente com nossa equipe.\n\n"
@@ -448,7 +448,7 @@ async def setup(ctx):
 @setup.error
 async def setup_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
-        embed = criar_embed_amarelo("🚫 Acesso Negado", "Apenas membros da **Administração / Staff** podem utilizar este comando.")
+        embed = criar_embed_amarelo(f"<:Erro:1528229921204207626> Acesso Negado", "Apenas membros da **Administração / Staff** podem utilizar este comando.")
         await ctx.send(embed=embed, delete_after=5)
 
 bot.run(TOKEN)
