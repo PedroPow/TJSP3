@@ -160,6 +160,11 @@ class ModalDados(discord.ui.Modal):
             f"<:ticketassumido:1526748366015565904> Solicitação Enviada!", 
             f"Sua solicitação foi enviada com sucesso para análise.\n\n**Código da Solicitação:** `{codigo}`"
         )
+
+        embed_sucesso.set_image(url="https://cdn.discordapp.com/attachments/1444735189765849320/1526692086819328070/Criadores_JP_2.png?ex=6a5d384e&is=6a5be6ce&hm=53d500b40f4406c93463f74e5c057d904a4b81a73297151169bb09b1ab5e1ef3&")
+
+        embed_sucesso.set_footer(text="TJSP Jardim Peri RP - Todos os direitos reservados © 2026", icon_url="https://cdn.discordapp.com/attachments/1444735189765849320/1526686691786752091/brasao_tjsp.webp?ex=6a5d3347&is=6a5be1c7&hm=0284944f3ad31a32d4d34509a53fed07b9ba9d9f157884459afc481d6b216bd1&")
+
         await interaction.response.send_message(embed=embed_sucesso, ephemeral=True)
 
 # ==============================================================================
@@ -271,7 +276,7 @@ class ViewInicio(discord.ui.View):
             if status_atual == "PENDENTE":
                 msg = "Você já possui uma solicitação em **análise**. Aguarde a aprovação ou recusa antes de tentar novamente."
             else:
-                msg = "Você já possui um set **aprovado** neste servidor. Não é possível solicitar outro."
+                msg = "Você já possui uma credencial **aprovada** no Tribunal de Justiça. Não é possível solicitar outro."
                 
             embed_bloqueio = criar_embed_amarelo(f"<:Erro:1528229921204207626> Acesso Bloqueado", msg)
             await interaction.response.send_message(embed=embed_bloqueio, ephemeral=True)
