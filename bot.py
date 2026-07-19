@@ -386,7 +386,7 @@ class ViewAprovacao(discord.ui.View):
 
         await interaction.response.edit_message(embed=embed, view=self)
 
-        embed_notif = criar_embed_amarelo(f"<:ticketassumido:1526748366015565904> Credencial Aprovada", f"A credencial de {membro.mention} foi aprovada com sucesso, o cargo Visitante foi removido e seu nome alterado para `{novo_nick}`!")
+        embed_notif = criar_embed_amarelo(f"<:ticketassumido:1526748366015565904> Credencial Aprovada", f"A credencial de {membro.mention} foi aprovada com sucesso, o cargo Visitante foi removido, novos cargos foram adicionados ({', '.join([role.name for role in roles_add])}) e seu nome alterado para `{novo_nick}`!")
         await interaction.followup.send(embed=embed_notif, ephemeral=True)
 
     @discord.ui.button(label="Reprovar", style=discord.ButtonStyle.secondary, emoji="<:x1:1527182368958316695>")
