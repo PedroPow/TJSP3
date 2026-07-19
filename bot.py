@@ -161,8 +161,6 @@ class ModalDados(discord.ui.Modal):
             f"Sua solicitação foi enviada com sucesso para análise.\n\n**Código da Solicitação:** `{codigo}`"
         )
 
-        embed_sucesso.set_image(url="https://cdn.discordapp.com/attachments/1444735189765849320/1526692086819328070/Criadores_JP_2.png?ex=6a5d384e&is=6a5be6ce&hm=53d500b40f4406c93463f74e5c057d904a4b81a73297151169bb09b1ab5e1ef3&")
-
         embed_sucesso.set_footer(text="TJSP Jardim Peri RP - Todos os direitos reservados © 2026", icon_url="https://cdn.discordapp.com/attachments/1444735189765849320/1526686691786752091/brasao_tjsp.webp?ex=6a5d3347&is=6a5be1c7&hm=0284944f3ad31a32d4d34509a53fed07b9ba9d9f157884459afc481d6b216bd1&")
 
         await interaction.response.send_message(embed=embed_sucesso, ephemeral=True)
