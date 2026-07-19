@@ -15,8 +15,6 @@ TOKEN = os.getenv("TOKEN_TJSP")  # Substitua pelo token do seu bot
 CANAL_LOGS_ID = 1527467826967744612  # Substitua pelo ID do canal de aprovação/logs
 
 # Mapeamento dos cargos do Discord.
-# AGORA CADA CHAVE MAPEIA PARA UMA LISTA DE IDS DE CARGOS!
-# Assim você pode adicionar 1, 2 ou mais cargos para cada opção selecionada.
 ROLES = {
     # Prefeitura e Cidadão
     "CIDADÃO": [1526643628548817056],
@@ -34,7 +32,7 @@ ROLES = {
     "Estagiário de Advocacia": [1526387373766606929],
     "Segurança": [1526387511755276369],
     
-    # Policia Militar (Exemplo de atribuição de múltiplos cargos: ID do Cargo + ID da Tag Geral da PM se quiser)
+    # Policia Militar
     "Comandante Geral da Policia Militar": [1527186659873919027, 1527164625744040048], 
     "Sub Comandante Geral da Policia Militar": [1527186549349810216, 1527164625744040048],
     "Coronel QOPM": [1527188175200456854, 1527164625744040048],
@@ -61,14 +59,12 @@ ROLES = {
     "Delegado Adjunto (PF)": [1527189628006699049, 1526386752070353056],
 }
 
-# ID do cargo que deve ser marcado nas logs (ex: Staff / Aprovadores)
 CARGO_RESPONSAVEL_ID = 1526624858912461002
 
 # ==============================================================================
 # FUNÇÃO AUXILIAR PARA EMBEDS PADRÃO AMARELO
 # ==============================================================================
 def criar_embed_amarelo(titulo: str, descricao: str = None) -> discord.Embed:
-    """Cria um Embed padronizado na cor amarela."""
     return discord.Embed(
         title=titulo,
         description=descricao,
@@ -137,9 +133,7 @@ class ModalDados(discord.ui.Modal):
             await interaction.response.send_message(embed=embed_erro, ephemeral=True)
             return
 
-        # Embed enviado para o Canal de Logs
-        embed_log = criar_embed_amarelo(f"<:assumirticket:1526748343978561547> Solicitação **{codigo}**", f"Uma nova solicitação foi recebida")
-
+        embed_log = criar_embed_amarelo(f"<:assumirticket:1526748343978561547> Solicitação **{codigo}**", "Uma nova solicitação foi recebida")
         embed_log.add_field(name="<:pessoas:1526764699490713662> Aberto por", value=f"**{interaction.user.mention} (`{interaction.user.id}`)**", inline=False)            
         embed_log.add_field(name="<:pessoas:1526764699490713662> Nome", value=f"`{self.nome.value}`", inline=False)
         embed_log.add_field(name="<:111:1526738453511934023> ID", value=f"`{self.identificador.value}`", inline=False)
@@ -150,36 +144,28 @@ class ModalDados(discord.ui.Modal):
 
         view = ViewAprovacao(codigo)
 
-        # UNICO ENVIO (Menciona os cargos e envia o embed numa única mensagem)
         await canal_logs.send(
             content=f"<@&1526383985129947206> <@&{CARGO_RESPONSAVEL_ID}>",
             embed=embed_log, 
             view=view
         )        
 
-        # Resposta privada ao usuário
         embed_sucesso = criar_embed_amarelo(
             f"<:ticketassumido:1526748366015565904> Solicitação Enviada!", 
             f"Sua solicitação foi enviada com sucesso para análise.\n\n**Código da Solicitação:** `{codigo}`"
         )
-
         await interaction.response.send_message(embed=embed_sucesso, ephemeral=True)
 
 # ==============================================================================
-# SELECT MENU DE CARGOS
-# ==============================================================================
-# ==============================================================================
 # DICIONÁRIO DE SUPORTE PARA OS EMOJIS DAS PATENTES
 # ==============================================================================
-# Aqui associamos o nome exato da sua chave ROLES ao emoji correspondente.
-# O Discord vai exibir esse emoji GRUDADO na patente dentro do Select Menu.
 EMOJIS_CARGOS = {
     "Comandante Geral da Policia Militar": "<:CMTG:1528263064493887659>",
     "Sub Comandante Geral da Policia Militar": "<:SUBCMTG:1528265603062960139>",
     "Coronel QOPM": "<:CEL:1528263109888835625>",
     "Tenente Coronel QOPM": "<:TENCEL:1528263185684234320>",
     "Major QOPM": "<:MAJOR:1528263226100285480>",
-    "Capitão QOPM": "<:CAP:1528263261127180449>"
+    "Capitão QOPM": "<:CAP:1528263261127180449>",
 
     "Comandante Geral da Guarda Civil Metropolitana": "<:CMTGGCM:1528273679497171075>",
     "Sub Comandante Geral da Guarda Civil Metropolitana": "<:SCMTGGCM:1528273713936601288>",
@@ -198,14 +184,12 @@ class SelectCargo(discord.ui.Select):
         
         options = []
         for cargo in opcoes:
-            # Pegamos o emoji correspondente à patente se ele existir no dicionário acima
             emoji_da_patente = EMOJIS_CARGOS.get(cargo, None)
             
-            # Criamos a opção do menu injetando o emoji nativamente
             options.append(discord.SelectOption(
-                label=cargo,         # O nome da patente que aparece escrito
-                value=cargo,         # O valor em texto puro que vai pro banco e pro ROLES
-                emoji=emoji_da_patente # O emoji personalizado que aparece do lado do nome!
+                label=cargo,         
+                value=cargo,         
+                emoji=emoji_da_patente 
             ))
             
         super().__init__(placeholder="Selecione o seu Cargo...", options=options)
@@ -245,7 +229,7 @@ class SelectInstituicao(discord.ui.Select):
         cargos_map = {
             "TJSP": ["Presidente", "Vice Presidente", "Administrador", "Desembargador Geral", "Juiz", "Advogado", "Promotor", "Oficial de Justiça", "Estagiário de Advocacia", "Segurança"],
             "POLICIA MILITAR": ["Comandante Geral da Policia Militar", "Sub Comandante Geral da Policia Militar", "Coronel QOPM", "Tenente Coronel QOPM", "Major QOPM", "Capitão QOPM"],
-            "GUARDA CIVIL Metropolitana": ["Comandante Geral da Guarda Civil Metropolitana", "Sub Comandante Geral da Guarda Civil Metropolitana", "Inspetor Superintendente", "Inspetor de Grupamento", "Inspetor de Divisão", "Inspetor"],
+            "GUARDA CIVIL METROPOLITANA": ["Comandante Geral da Guarda Civil Metropolitana", "Sub Comandante Geral da Guarda Civil Metropolitana", "Inspetor Superintendente", "Inspetor de Grupamento", "Inspetor de Divisão", "Inspetor"],
             "POLICIA CIVIL": ["Delegado Geral (PC)", "Delegado (PC)", "Delegado Adjunto (PC)"],
             "POLICIA FEDERAL": ["Delegado Geral (PF)", "Delegado (PF)", "Delegado Adjunto (PF)"]
         }
@@ -271,7 +255,6 @@ class ViewInicio(discord.ui.View):
 
     @discord.ui.button(label="Solicitar Credencial", style=discord.ButtonStyle.secondary, emoji="<:assumirticket:1526748343978561547>", custom_id="btn_solicitar_set")
     async def solicitar_set(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Verifica se o membro já tem um set PENDENTE ou ACEITO no banco de dados
         cursor.execute("SELECT status FROM solicitacoes WHERE user_id = ? AND (status = 'PENDENTE' OR status = 'ACEITO')", (interaction.user.id,))
         resultado = cursor.fetchone()
 
@@ -286,7 +269,6 @@ class ViewInicio(discord.ui.View):
             await interaction.response.send_message(embed=embed_bloqueio, ephemeral=True)
             return
 
-        # Se não tiver nenhum pendente/aceito, segue para a seleção normalmente
         embed_inst = criar_embed_amarelo(
             "⚖️ Seleção de Instituição", 
             "Selecione a sua instituição no menu abaixo para continuar:"
@@ -294,7 +276,7 @@ class ViewInicio(discord.ui.View):
         await interaction.response.send_message(embed=embed_inst, view=ViewInstituicao(), ephemeral=True)
 
 # ==============================================================================
-# BOTÕES DE APROVAÇÃO / REPROVAÇÃO (SISTEMA DE LOGS COM RESTRIÇÃO)
+# BOTÕES DE APROVAÇÃO / REPROVAÇÃO
 # ==============================================================================
 class ViewAprovacao(discord.ui.View):
     def __init__(self, codigo: str = None):
@@ -304,7 +286,6 @@ class ViewAprovacao(discord.ui.View):
             self.recusar.custom_id = f"recusar_{codigo}"
 
     async def _validar_permissao_prefeitura(self, interaction: discord.Interaction, instituicao: str) -> bool:
-        """Verifica permissão exclusiva para aprovações/reprovações da Prefeitura"""
         if instituicao == "PREFEITURA":
             ids_prefeitura = ROLES.get("PREFEITURA", [])
             tem_cargo = any(role.id in ids_prefeitura for role in interaction.user.roles)
@@ -340,12 +321,11 @@ class ViewAprovacao(discord.ui.View):
             return
 
         membro = interaction.guild.get_member(user_id)
-        if not membro:
+        if not miembro:
             embed_erro = criar_embed_amarelo(f"<:Erro:1528229921204207626> Erro", "O membro solicitante não foi encontrado no servidor.")
             await interaction.response.send_message(embed=embed_erro, ephemeral=True)
             return
 
-        # ALTERAÇÃO DO APELIDO (NICKNAME) NO SERVIDOR
         novo_nick = f"{nome_rp} | {id_game}"
         try:
             if len(novo_nick) > 32:
@@ -354,7 +334,6 @@ class ViewAprovacao(discord.ui.View):
         except Exception as e:
             print(f"⚠️ Erro ao tentar alterar o apelido: {e}")
 
-        # LÓGICA DE ATRIBUIÇÃO DOS NOVOS CARGOS
         roles_ids = ROLES.get(cargo_nome, [])
         roles_add = []
         for r_id in roles_ids:
@@ -368,7 +347,6 @@ class ViewAprovacao(discord.ui.View):
             except Exception as e:
                 print(f"Erro ao adicionar cargos: {e}")
 
-        # REGRA NOVA: REMOVER O CARGO VISITANTE ("1526629697247776839")
         cargo_visitante = interaction.guild.get_role(1526629697247776839)
         if cargo_visitante and cargo_visitante in membro.roles:
             try:
@@ -376,11 +354,9 @@ class ViewAprovacao(discord.ui.View):
             except Exception as e:
                 print(f"⚠️ Erro ao tentar remover o cargo Visitante: {e}")
 
-        # Seta o status definitivo como ACEITO (Mantém o botão Solicitar Set bloqueado para sempre)
         cursor.execute("UPDATE solicitacoes SET status = 'ACEITO', processado_por = ? WHERE codigo = ?", (interaction.user.id, codigo))
         conn.commit()
 
-        # Atualiza o Embed da Log
         embed = interaction.message.embeds[0]
         embed.color = discord.Color.yellow()
         
@@ -420,12 +396,9 @@ class ViewAprovacao(discord.ui.View):
             await interaction.response.send_message(embed=embed_aviso, ephemeral=True)
             return
 
-        # Atualiza para RECUSADO no banco. Na próxima vez que o usuário clicar em "Solicitar Set",
-        # a query do banco não vai achar nenhum 'PENDENTE' ou 'ACEITO', permitindo que ele envie de novo.
         cursor.execute("UPDATE solicitacoes SET status = 'RECUSADO', processado_por = ? WHERE codigo = ?", (interaction.user.id, codigo))
         conn.commit()
 
-        # Atualiza o Embed da Log
         embed = interaction.message.embeds[0]
         embed.color = discord.Color.yellow()
         
@@ -472,12 +445,11 @@ async def on_ready():
     except Exception as e:
         print(e)
 
-# COMANDO EXCLUSIVO PARA ADMINISTRADORES/STAFF ENVIAR O PAINEL
 @bot.command(name="setup")
 @commands.has_permissions(administrator=True)
 async def setup(ctx):
     embed_painel = criar_embed_amarelo(
-        titulo=f"<:TJSP:1527173718445654188> Central de Atendimento Jurídico",
+        titulo="<:TJSP:1527173718445654188> Central de Atendimento Jurídico",
         descricao=
         "Seja bem-vindo(a) ao sistema de atendimento da Jardim Peri.\n"
         "Através do atendimento, você pode falar diretamente com nossa equipe.\n\n"
@@ -485,12 +457,11 @@ async def setup(ctx):
         "**Horário de Atendimento:** 08:00 - 00:00"
     )
 
-    embed_painel.set_image(url="https://cdn.discordapp.com/attachments/1444735189765849320/1526692086819328070/Criadores_JP_2.png?ex=6a5943ce&is=6a57f24e&hm=484f998b6d3387c061b1d67dd92235928c3d166c1798788fa9d0e4f2b6d2de18&")
-    embed_painel.set_footer(text="TJSP Jardim Peri RP - Todos os direitos reservados © 2026", icon_url="https://cdn.discordapp.com/attachments/1444735189765849320/1526686691786752091/brasao_tjsp.webp?ex=6a593ec7&is=6a57ed47&hm=675a0a3d73ee60941aa54937e4ca85e84daa38622e0a70abf002cf659115cd59&")
+    embed_painel.set_image(url="https://cdn.discordapp.com/attachments/1444735189765849320/1526692086819328070/Criadores_JP_2.png")
+    embed_painel.set_footer(text="TJSP Jardim Peri RP - Todos os direitos reservados © 2026", icon_url="https://cdn.discordapp.com/attachments/1444735189765849320/1526686691786752091/brasao_tjsp.webp")
 
     await ctx.send(embed=embed_painel, view=ViewInicio())
 
-# Trata o erro caso um membro sem permissão tente usar o !setup
 @setup.error
 async def setup_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
