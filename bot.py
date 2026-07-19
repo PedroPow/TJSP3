@@ -144,11 +144,11 @@ class ModalDados(discord.ui.Modal):
 
         view = ViewAprovacao(codigo)
 
-        await canal_logs.send(
-            content=f"<@&1526383985129947206> <@&{CARGO_RESPONSAVEL_ID}>",
-            embed=embed_log, 
-            view=view
-        )        
+        # await canal_logs.send(
+        #    content=f"<@&1526383985129947206> <@&{CARGO_RESPONSAVEL_ID}>",
+        #    embed=embed_log, 
+        #    view=view
+        #)        
 
         embed_sucesso = criar_embed_amarelo(
             f"<:ticketassumido:1526748366015565904> Solicitação Enviada!", 
@@ -316,7 +316,7 @@ class ViewAprovacao(discord.ui.View):
             return
 
         if status != "PENDENTE":
-            embed_aviso = criar_embed_amarelo("⚠️ Atenção", f"Esta solicitação já foi **{status}** anteriormente.")
+            embed_aviso = criar_embed_amarelo(f"<:Erro:1528229921204207626> Atenção", f"Esta solicitação já foi **{status}** anteriormente.")
             await interaction.response.send_message(embed=embed_aviso, ephemeral=True)
             return
 
@@ -332,7 +332,7 @@ class ViewAprovacao(discord.ui.View):
                 novo_nick = novo_nick[:32]
             await membro.edit(nick=novo_nick)
         except Exception as e:
-            print(f"⚠️ Erro ao tentar alterar o apelido: {e}")
+            print(f"<:Erro:1528229921204207626> Erro ao tentar alterar o apelido: {e}")
 
         roles_ids = ROLES.get(cargo_nome, [])
         roles_add = []
@@ -352,7 +352,7 @@ class ViewAprovacao(discord.ui.View):
             try:
                 await membro.remove_roles(cargo_visitante)
             except Exception as e:
-                print(f"⚠️ Erro ao tentar remover o cargo Visitante: {e}")
+                print(f"<:Erro:1528229921204207626> Erro ao tentar remover o cargo Visitante: {e}")
 
         cursor.execute("UPDATE solicitacoes SET status = 'ACEITO', processado_por = ? WHERE codigo = ?", (interaction.user.id, codigo))
         conn.commit()
@@ -392,7 +392,7 @@ class ViewAprovacao(discord.ui.View):
             return
 
         if status != "PENDENTE":
-            embed_aviso = criar_embed_amarelo("⚠️ Atenção", f"Esta solicitação já foi **{status}**.")
+            embed_aviso = criar_embed_amarelo(f"<:Erro:1528229921204207626> Atenção", f"Esta solicitação já foi **{status}**.")
             await interaction.response.send_message(embed=embed_aviso, ephemeral=True)
             return
 
